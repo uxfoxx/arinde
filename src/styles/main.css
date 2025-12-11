@@ -1,0 +1,16 @@
+@import url('/vendor/fontawesome-5.14.0.min.css');
+@import url('/vendor/bootstrap/css/bootstrap.min.css');
+@import url('/vendor/magnific-popup/css/magnific-popup.min.css');
+@import url('/vendor/animate.min.css');
+@import url('/vendor/slick/css/slick.min.css');
+@import url('/css/style.css');
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Montserrat', sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+}
