@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import Carousel from 'react-bootstrap/Carousel'
 import Layout from '../components/Layout'
 import { supabase } from '../lib/supabase'
 import type { Database } from '../lib/database.types'
@@ -22,7 +23,7 @@ export default function Home() {
 
   const loadData = async () => {
     const [projectsRes, servicesRes, testimonialsRes, settingsRes] = await Promise.all([
-      supabase.from('projects').select('*').eq('is_published', true).eq('featured', true).order('order_number'),
+      supabase.from('projects').select('*').eq('is_published', true).order('order_number'),
       supabase.from('services').select('*').eq('is_active', true).order('order_number'),
       supabase.from('testimonials').select('*').eq('is_active', true).order('order_number'),
       supabase.from('site_settings').select('*').maybeSingle()
@@ -36,21 +37,65 @@ export default function Home() {
 
   const filteredProjects = selectedCategory === '*'
     ? projects
-    : projects.filter(p => p.category === selectedCategory)
+    : projects.filter(p => p.category?.toUpperCase() === selectedCategory)
 
   return (
     <Layout>
       <section className="hero-area black-120-bg">
-        <div className="carousel slide" id="recipeCarousel" data-bs-ride="carousel">
-          <div className="carousel-inner" role="listbox">
-            <div className="carousel-item active" style={{ backgroundImage: `url(${settings?.hero_images[0]})` }}>
-              <div className="container pt-64 pb-64">
-                <p className="text-white category-line category-hero">{settings?.hero_category}</p>
-                <h1 className="col-lg-10 text-white">{settings?.hero_title}</h1>
+        <Carousel id="recipeCarousel" controls={false} indicators={false} interval={5000}>
+          <Carousel.Item style={{ backgroundImage: `url(${settings?.hero_images?.[0] || '/images/background/slider-1.png'})` }}>
+            <div className="container pt-64 pb-64">
+              <p className="text-white category-line category-hero">{settings?.hero_category || 'MODERN'}</p>
+              <h1 className="col-lg-10 text-white">{settings?.hero_title || 'Architecture And Interior Design From Arinde'}</h1>
+              <div className="row pt-32">
+                <div className="carousel-buttons col-6">
+                  <button className="prev" type="button">
+                    <span className="carousel-control-prev-icon" aria-hidden="true">
+                      <i className="fa fa-long-arrow-left"></i>
+                    </span>
+                  </button>
+                  <button type="button">
+                    <span className="carousel-control-next-icon" aria-hidden="true">
+                      <i className="fa fa-long-arrow-right"></i>
+                    </span>
+                  </button>
+                </div>
+                <div className="small-img col-6">
+                  <Link to="/projects">
+                    <img className="hero-img" src="/images/background/slider-1-sm.png" alt="hero image" title="hero image" />
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </Carousel.Item>
+          {settings?.hero_images?.[1] && (
+            <Carousel.Item style={{ backgroundImage: `url(${settings.hero_images[1]})` }}>
+              <div className="container pt-64 pb-64">
+                <p className="text-white category-line category-hero">DESIGN</p>
+                <h1 className="col-lg-10 text-white">{settings?.hero_subtitle || 'Interior And Architecture Design From Arinde'}</h1>
+                <div className="row pt-32">
+                  <div className="carousel-buttons col-6">
+                    <button className="prev" type="button">
+                      <span className="carousel-control-prev-icon" aria-hidden="true">
+                        <i className="fa fa-long-arrow-left"></i>
+                      </span>
+                    </button>
+                    <button type="button">
+                      <span className="carousel-control-next-icon" aria-hidden="true">
+                        <i className="fa fa-long-arrow-right"></i>
+                      </span>
+                    </button>
+                  </div>
+                  <div className="small-img col-6">
+                    <Link to="/projects">
+                      <img className="hero-img" src="/images/background/slider-2-sm.jpg" alt="hero image" title="hero image" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </Carousel.Item>
+          )}
+        </Carousel>
       </section>
 
       <section className="about-area py-128 black-100-bg">
@@ -59,12 +104,16 @@ export default function Home() {
             <div className="col-sm-12 content pt-40">
               <div className="big-text category-line">ABOUT US</div>
               <div className="row pt-32">
-                <h2 className="col-md-6">{settings?.about_title}</h2>
+                <h2 className="col-md-6">{settings?.about_title || 'We are a passionate team aim to creating best living spaces'}</h2>
               </div>
               <div className="row pt-96 pb-64">
-                <p className="col-md-6 col-lg-3 text">{settings?.about_text}</p>
+                <p className="col-md-6 col-lg-3 text">
+                  {settings?.about_text || "ARINDE has worked on projects nationwide and worldwide, designs that make magic happen, without the wand. focuses more on structural design, whereas interior design is the practice of creating interior atmosphere. This involves carefully designing lines, colors, plants, lighting, building materials, and space to create an area that feels nurturing to the human body."}
+                </p>
+                <img className="small-image col-md-6 col-lg-5" src="/images/about/image-2.png" alt="about image" title="about image" />
               </div>
             </div>
+            <img className="col-sm-12 col-md-6 right-image" src="/images/about/image-1.png" alt="about image" title="about image" />
           </div>
         </div>
       </section>
@@ -73,25 +122,35 @@ export default function Home() {
         <div className="container">
           <div className="d-flex section-heading mb-96">
             <div className="section-title">
-              <h2 className="wow fadeInUp delay-0-2s">Services Provided In Interior And Architecture Design</h2>
+              <h2 className="wow fadeInUp delay-0-2s">
+                Services Provided In Interior <br />
+                And Architecture Design
+              </h2>
             </div>
           </div>
-          <div className="carousel slide" id="servicerecipeCarousel" data-bs-ride="carousel">
-            <div className="carousel-inner" role="listbox">
-              {services.map((service, index) => (
-                <div key={service.id} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
-                  <div className="col-12 col-md-6 col-lg-4 col-xl-3 item service-act">
-                    <h5>{String(index + 1).padStart(2, '0')}</h5>
-                    {service.image_url && <img src={service.image_url} alt={service.title} />}
-                    <div className="carousel-caption">
+          <Carousel id="servicerecipeCarousel" controls={false} indicators={false} interval={3000}>
+            {services.map((service, index) => (
+              <Carousel.Item key={service.id}>
+                <div className="col-12 col-md-6 col-lg-4 col-xl-3 item service-act">
+                  <h5>{String(index + 1).padStart(2, '0')}</h5>
+                  <Link to="/projects">
+                    <img src={service.image_url || ''} alt={service.title} />
+                  </Link>
+                  <div className="carousel-caption">
+                    <Link to="/projects">
                       <h6 className="text-black">{service.title}</h6>
-                      <p className="mb-16">{service.description}</p>
-                    </div>
+                    </Link>
+                    <p className="mb-16">{service.description}</p>
+                    <Link to="/projects">
+                      <span className="right-arrow text-black">
+                        <i className="fa fa-long-arrow-right"></i>
+                      </span>
+                    </Link>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+              </Carousel.Item>
+            ))}
+          </Carousel>
         </div>
       </section>
 
@@ -104,25 +163,41 @@ export default function Home() {
             </div>
           </div>
           <ul className="project-filter tab-style-one justify-content-center nav nav-pills nav-fill mb-96 wow fadeInUp delay-0-4s">
-            <li data-filter="*" className={`nav-item ${selectedCategory === '*' ? 'current' : ''}`} onClick={() => setSelectedCategory('*')}>
+            <li
+              data-filter="*"
+              className={`nav-item ${selectedCategory === '*' ? 'current' : ''}`}
+              onClick={() => setSelectedCategory('*')}
+            >
               <a className="nav-link">ALL</a>
             </li>
-            <li className={`nav-item ${selectedCategory === 'ARCHITECTURE' ? 'current' : ''}`} onClick={() => setSelectedCategory('ARCHITECTURE')}>
+            <li
+              className={`nav-item ${selectedCategory === 'ARCHITECTURE' ? 'current' : ''}`}
+              onClick={() => setSelectedCategory('ARCHITECTURE')}
+            >
               <a className="nav-link">ARCHITECTURE</a>
             </li>
-            <li className={`nav-item ${selectedCategory === 'INTERIOR' ? 'current' : ''}`} onClick={() => setSelectedCategory('INTERIOR')}>
+            <li
+              className={`nav-item ${selectedCategory === 'INTERIOR' ? 'current' : ''}`}
+              onClick={() => setSelectedCategory('INTERIOR')}
+            >
               <a className="nav-link">INTERIOR</a>
             </li>
-            <li className={`nav-item ${selectedCategory === 'LANDSCAPE' ? 'current' : ''}`} onClick={() => setSelectedCategory('LANDSCAPE')}>
+            <li
+              className={`nav-item ${selectedCategory === 'LANDSCAPE' ? 'current' : ''}`}
+              onClick={() => setSelectedCategory('LANDSCAPE')}
+            >
               <a className="nav-link">LANDSCAPE</a>
             </li>
-            <li className={`nav-item ${selectedCategory === 'REMODELING' ? 'current' : ''}`} onClick={() => setSelectedCategory('REMODELING')}>
+            <li
+              className={`nav-item ${selectedCategory === 'REMODELING' ? 'current' : ''}`}
+              onClick={() => setSelectedCategory('REMODELING')}
+            >
               <a className="nav-link">REMODELING</a>
             </li>
           </ul>
           <div className="row gap-128 project-active">
-            {filteredProjects.map(project => (
-              <div key={project.id} className="col-xl-6 col-md-6 item">
+            {filteredProjects.map((project) => (
+              <div key={project.id} className={`col-xl-6 col-md-6 item ${project.category?.toUpperCase()}`}>
                 <div className="row apartment-image wow fadeInLeft delay-0-1s">
                   <Link to={`/projects/${project.slug}`}>
                     <img src={project.featured_image || ''} alt={project.title} />
@@ -133,14 +208,16 @@ export default function Home() {
                     <Link to={`/projects/${project.slug}`}>
                       <h4 className="text-black">{project.title}</h4>
                     </Link>
-                    <span className="category">{project.category}</span>
+                    <span className="category">{project.category?.toUpperCase()}</span>
                   </div>
                 </div>
               </div>
             ))}
           </div>
           <div className="col-12 text-center">
-            <Link className="loadmore primary-readmore" to="/projects">More Projects</Link>
+            <Link className="loadmore primary-readmore" to="/projects">
+              More Projects
+            </Link>
           </div>
         </div>
       </section>
@@ -154,31 +231,33 @@ export default function Home() {
             </div>
           </div>
           <div className="row">
-            <div id="testiCarousel" className="col-md-12 testimonials-slider carousel slide wow fadeInUp delay-0-4s" data-bs-ride="carousel">
-              <div className="carousel-inner" role="listbox">
-                {testimonials.map((testimonial, index) => (
-                  <div key={testimonial.id} className={`row carousel-item ${index === 0 ? 'active' : ''}`}>
-                    <div className="testimonial-item">
-                      <div className="section-title mb-32 wow fadeInUp delay-0-2s">
-                        {[...Array(testimonial.rating)].map((_, i) => (
-                          <i key={i} className="fa fa-star"></i>
-                        ))}
-                      </div>
-                      <div className="h5 author-text mb-32">"{testimonial.content}"</div>
-                      <div className="d-flex">
-                        {testimonial.photo_url && (
-                          <img className="testi-img" src={testimonial.photo_url} alt={testimonial.client_name} />
-                        )}
-                        <div className="testi-author">
-                          <h5 className="text-white">{testimonial.client_name}</h5>
-                          <p className="designations">{testimonial.company}</p>
+            <div className="col-md-12">
+              <Carousel id="testiCarousel" controls={false} indicators={false} interval={4000}>
+                {testimonials.map((testimonial) => (
+                  <Carousel.Item key={testimonial.id}>
+                    <div className="row">
+                      <div className="testimonial-item">
+                        <div className="section-title mb-32 wow fadeInUp delay-0-2s">
+                          {[...Array(testimonial.rating || 5)].map((_, i) => (
+                            <i key={i} className="fa fa-star"></i>
+                          ))}
                         </div>
-                        <i className="fas fa-quote-right"></i>
+                        <div className="h5 author-text mb-32">"{testimonial.content}"</div>
+                        <div className="d-flex">
+                          {testimonial.photo_url && (
+                            <img className="testi-img" src={testimonial.photo_url} alt={testimonial.client_name} />
+                          )}
+                          <div className="testi-author">
+                            <h5 className="text-white">{testimonial.client_name}</h5>
+                            <p className="designations">{testimonial.company}</p>
+                          </div>
+                          <i className="fas fa-quote-right"></i>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </Carousel.Item>
                 ))}
-              </div>
+              </Carousel>
             </div>
           </div>
         </div>
